@@ -55,37 +55,37 @@ commands:
                   echo 'export GIT_TAG_IMAGE_URL=<< parameters.image-name >>:${GIT_TAG_IMAGE_TAG}' >> "$BASH_ENV"
                   echo 'export IMAGE_TAG_LIST=${GIT_TAG_IMAGE_TAG}' >> "$BASH_ENV"
 
-  save-images:
-    parameters:
-      tmp-dir:
-        type: string
-        default: "/tmp/images"
-      images:
-        type: string
-    steps:
-      - run:
-          name: Persist Docker images to tar file
-          command: |
-            mkdir -p << parameters.tmp-dir >>
-            docker save << parameters.images >> -o << parameters.tmp-dir >>/build-image
-      - persist_to_workspace:
-          name: Persist the workspace for later use
-          root: << parameters.tmp-dir >>
-          paths:
-            - build-image
+  # save-images:
+  #   parameters:
+  #     tmp-dir:
+  #       type: string
+  #       default: "/tmp/images"
+  #     images:
+  #       type: string
+  #   steps:
+  #     - run:
+  #         name: Persist Docker images to tar file
+  #         command: |
+  #           mkdir -p << parameters.tmp-dir >>
+  #           docker save << parameters.images >> -o << parameters.tmp-dir >>/build-image
+  #     - persist_to_workspace:
+  #         name: Persist the workspace for later use
+  #         root: << parameters.tmp-dir >>
+  #         paths:
+  #           - build-image
 
-  load-images:
-    parameters:
-      tmp-dir:
-        type: string
-        default: "/tmp/images"
-    steps:
-      - attach_workspace:
-          name: Attach to previously created workspace
-          at: << parameters.tmp-dir >>
-      - run:
-          name: Load Docker images
-          command: docker load -i << parameters.tmp-dir >>/build-image
+  # load-images:
+  #   parameters:
+  #     tmp-dir:
+  #       type: string
+  #       default: "/tmp/images"
+  #   steps:
+  #     - attach_workspace:
+  #         name: Attach to previously created workspace
+  #         at: << parameters.tmp-dir >>
+  #     - run:
+  #         name: Load Docker images
+  #         command: docker load -i << parameters.tmp-dir >>/build-image
 
   build-image:
     parameters:
@@ -175,11 +175,11 @@ jobs:
       # run tests or pushing to remote repos.
       # We prioritise pushing the tags first and we do this conditionally because it takes a while
       # to persist everything
-      - when:
-          condition: << parameters.save-images-in-workflow >>
-          steps:
-            - save-images:
-                images: "${SHA1_IMAGE_URL} ${GIT_TAG_IMAGE_URL} ${BRANCH_IMAGE_URL} ${SHA1_IMAGE_URL}-test ${BRANCH_IMAGE_URL}-test"
+      # - when:
+      #     condition: << parameters.save-images-in-workflow >>
+      #     steps:
+            # - save-images:
+            #     images: "${SHA1_IMAGE_URL} ${GIT_TAG_IMAGE_URL} ${BRANCH_IMAGE_URL} ${SHA1_IMAGE_URL}-test ${BRANCH_IMAGE_URL}-test"
 
   container-structure-tests:
     parameters:
@@ -192,7 +192,7 @@ jobs:
       - checkout
       - setup-remote-docker-with-experimental-feats
       # Load the previously saved docker images from the CCI workspace
-      - load-images
+      # - load-images
       # Compute the env vars with the resulting docker tags and docker image names
       - compute-docker-tags:
           image-name: << parameters.container-image >>
@@ -216,7 +216,7 @@ jobs:
     steps:
       - setup-remote-docker-with-experimental-feats
       # Load the previously saved docker images from the CCI workspace
-      - load-images
+      # - load-images
       # Compute the env vars with the resulting docker tags and docker image names
       - compute-docker-tags:
           image-name: << parameters.container-image >>
@@ -246,7 +246,7 @@ jobs:
           squash: << parameters.squash-images >>
       - setup-remote-docker-with-experimental-feats
       # Load the previously saved docker images from the CCI workspace
-      - load-images
+      # - load-images
       # Docker login
       - docker/check
       - docker/push:
